@@ -1,5 +1,6 @@
 import os
 from posixpath import split
+from collections import OrderedDict
 
 class Board:
     def __init__ (self, board_data):
@@ -24,20 +25,18 @@ def part1():
             if number in board.data:
                 index = board.data.index(number)
                 row = index // 5
-                col = index % 5 - 1
+                col = index % 5 
                 board.visited[index // 5][index % 5] = 'x'
                 has_bingo = check_for_bingo(board, index)
                 if(has_bingo):
                     print('Bingo! Index = {}'.format(index))
                     print(board.visited)
+                    print("Sum unvisited: {}".format(sum_unvisited_number(board) * number))
                     exit()
 
 def check_for_bingo(board, index):
     row = index // 5
-    col = index % 5 - 1
-
-    if col == -1:
-        col = 0
+    col = index % 5 
 
     has_bingo = False
     
@@ -47,7 +46,7 @@ def check_for_bingo(board, index):
         return has_bingo
 
 
-    for r in range (0, row):
+    for r in range (0, len(board.visited)):
         if board.visited[r][col] == '':
             has_bingo = False
             return has_bingo
@@ -56,11 +55,44 @@ def check_for_bingo(board, index):
     
     return has_bingo
 
+def sum_unvisited_number(board):
+    sum = 0
+
+    for row in range(0, len(board.visited)):
+        for col in range (0, len(board.visited[row])):
+            if board.visited[row][col] == '':
+                sum += board.data[row*5 + col]
+
+    return sum
+
 
 def part2():
-    pass
+    numbers = list(map(int, input[0].split(',')))
+    
+    boards = [Board(board_data) for board_data in input[1:]]
+
+    winners = []
+    scores = []
+
+    for number in numbers:
+        for board in boards:
+            if number in board.data and board not in winners:
+                index = board.data.index(number)
+                row = index // 5
+                col = index % 5 
+                board.visited[index // 5][index % 5] = 'x'
+                has_bingo = check_for_bingo(board, index)
+                if(has_bingo):
+                    print('Bingo! Index = {}'.format(index))
+                    print(board.visited)
+                    print("Sum unvisited: {}".format(sum_unvisited_number(board) * number))
+                    winners.append(board)
+                    scores.append(sum_unvisited_number(board) * number)
+    
+    print("----------------------------------------------")
+    print("Sum of last board to win: {}".format(scores[-1]))
 
 
 if __name__ == '__main__':
-    part1()
+    #part1()
     part2()
